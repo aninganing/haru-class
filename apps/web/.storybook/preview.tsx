@@ -14,8 +14,8 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    // 검사 대상(context)은 지정하지 않는다. Vitest 브라우저 모드에는 #storybook-root가 없다.
     a11y: {
-      context: '#storybook-root',
       test: 'error',
     },
   },

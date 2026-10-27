@@ -3,6 +3,9 @@
   "globalEnv": [
     "NODE_ENV"
   ],
+  "globalDependencies": [
+    "eslint.config.mjs"
+  ],
   "tasks": {
     "build": {
       "dependsOn": [
@@ -27,7 +30,8 @@
       "dependsOn": [
         "^build",
         "generate"
-      ]
+      ],
+      "outputs": []
     },
     "typecheck": {
       "dependsOn": [
@@ -72,6 +76,23 @@
       "outputs": [
         "src/generated/**"
       ]
+    },
+    "build:check": {
+      "dependsOn": [
+        "^build",
+        "generate"
+      ],
+      "outputs": [
+        "dist-check/**",
+        ".next-check/**",
+        "!.next-check/cache/**"
+      ]
+    },
+    "test:storybook": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": []
     }
   }
 }

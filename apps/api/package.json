@@ -13,7 +13,9 @@
     "test:watch": "vitest",
     "test:e2e": "vitest run -c vitest.e2e.config.mts",
     "generate": "prisma generate",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "lint": "eslint src test",
+    "build:check": "tsc -p tsconfig.build.json --outDir dist-check"
   },
   "dependencies": {
     "@haru/contracts": "workspace:*",

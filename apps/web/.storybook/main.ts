@@ -12,6 +12,7 @@ const config: StorybookConfig = {
     getAbsolutePath('@storybook/addon-docs'),
     getAbsolutePath('@storybook/addon-a11y'),
     getAbsolutePath('@storybook/addon-themes'),
+    getAbsolutePath('@storybook/addon-vitest'),
   ],
   framework: {
     name: getAbsolutePath('@storybook/nextjs-vite'),

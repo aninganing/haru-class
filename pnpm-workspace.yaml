@@ -9,3 +9,5 @@ allowBuilds:
   esbuild: true
   msgpackr-extract: true
   prisma: true
+  # 네이티브 바이너리는 optionalDependencies로 설치되고, postinstall은 보조 다운로드용이라 실행하지 않는다
+  unrs-resolver: false

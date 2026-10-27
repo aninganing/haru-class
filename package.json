@@ -16,10 +16,21 @@
     "db:migrate": "pnpm --filter @haru/api prisma:migrate",
     "test:e2e": "turbo run test:e2e",
     "storybook": "turbo run storybook --filter=@haru/web",
-    "build-storybook": "turbo run build-storybook --filter=@haru/web"
+    "build-storybook": "turbo run build-storybook --filter=@haru/web",
+    "test:storybook": "turbo run test:storybook",
+    "build:check": "turbo run build:check",
+    "precommit": "turbo run typecheck lint test test:storybook build:check --continue"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.3",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-storybook": "10.6.3",
+    "globals": "17.13.0",
     "turbo": "^2.11.10",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "8.72.0"
   }
 }

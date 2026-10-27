@@ -12,3 +12,5 @@ next-env.d.ts
 storybook-static
 *storybook.log
 .pr-drafts
+dist-check
+.next-check
