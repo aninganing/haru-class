@@ -55,12 +55,13 @@ hotfix/... : main에서 분기 → main으로 PR → develop에도 반영
 
 ### 스킬
 
-`feature`(전체 흐름) · `plan-steps`(단계 계획) · `verify`(검증) · `split-commit`(관심사별 커밋) · `nest-module` · `web-feature` · `write-tests` · `write-stories` · `security-check` · `edge-cases` · `a11y-check`
+`feature`(전체 흐름) · `plan-steps`(단계 계획) · `verify`(작업 중 빠른 검증) · `precommit`(커밋 전 전체 검사) · `split-commit`(커밋 추천) · `pr-draft`(PR 초안) · `nest-module` · `web-feature` · `write-tests` · `write-stories` · `security-check` · `edge-cases` · `a11y-check`
 
 ## 반드시 지킬 것
 
 - **contracts가 단일 진실 공급원**이다. API 요청/응답 형태는 `packages/contracts`의 zod 스키마로 정의하고 api·web 모두 그 타입을 쓴다. 바꾸면 `pnpm --filter @haru/contracts build`.
-- **개발 서버가 떠 있을 때 `build`를 돌리지 않는다.** `nest build`가 `dist`를 지워 `pnpm dev`의 api가 죽는다. 검증은 `/verify` 스킬(typecheck·test 위주)을 쓴다.
+- **개발 서버가 떠 있을 때 `build`를 돌리지 않는다.** `nest build`가 `dist`를 지워 `pnpm dev`의 api가 죽는다. 빌드 검증은 별도 폴더로 빌드하는 `pnpm build:check`를 쓴다.
+- 커밋 추천 전에는 `/precommit`이 통과해야 한다.
 - 의존성 추가는 메인 세션만 한다 (병렬 에이전트가 동시에 `pnpm add`하면 lockfile이 충돌한다). pnpm 11의 minimumReleaseAge 때문에 하루 이내 릴리스는 설치가 막힐 수 있다 → 이전 버전으로 고정한다.
 - Node는 22.14(현재 로컬). 엔진 요구가 더 높은 패키지(jsdom 30 등)는 쓰지 않는다.
 - TypeScript는 5.9 (Nest 데코레이터 메타데이터). `baseUrl` 같은 TS 6+ deprecated 옵션을 쓰지 않는다.
@@ -90,6 +91,10 @@ pnpm db:up              # PostgreSQL, Redis (Docker)
 pnpm typecheck          # 전체 타입 체크 (병렬)
 pnpm test               # 전체 단위 테스트 (병렬)
 pnpm test:e2e           # api e2e (db:up 필요)
+pnpm lint               # ESLint (루트 eslint.config.mjs)
+pnpm test:storybook     # 스토리를 Chromium에서 실행 (play·a11y)
+pnpm build:check        # dist-check/·.next-check/로 빌드 (dev 중에도 안전)
+pnpm precommit          # typecheck·lint·test·test:storybook·build:check 병렬 (커밋 전)
 pnpm storybook          # web Storybook :6006
 pnpm build-storybook    # Storybook 정적 빌드 (dev 중에도 안전)
 pnpm --filter @haru/api prisma:migrate   # 마이그레이션

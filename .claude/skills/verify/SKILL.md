@@ -5,6 +5,8 @@ description: haru-class 변경 사항을 안전하게 검증한다. 타입 체�
 
 # 검증
 
+작업 중에 빠르게 돌리는 검증이다 (typecheck·test 중심). **커밋 직전**에는 lint·Storybook 테스트·빌드까지 포함한 `/precommit`을 쓴다.
+
 ## 1. 상태 확인 (병렬로 한 번에)
 
 ```bash

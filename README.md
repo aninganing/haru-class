@@ -48,6 +48,7 @@ pnpm install
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 pnpm db:up        # PostgreSQL, Redis (Docker)
+pnpm --filter @haru/web exec playwright install chromium   # Storybook 테스트용 (최초 1회)
 pnpm dev          # web: http://localhost:3000, api: http://localhost:4000
 ```
 
@@ -62,6 +63,10 @@ http://localhost:3000 에서 API·DB·Redis 상태 카드가 10초마다 갱신�
 | `pnpm typecheck` | 전체 타입 체크 |
 | `pnpm test` | 전체 단위 테스트 (api: Vitest+SWC, web: Vitest+Testing Library, contracts) |
 | `pnpm test:e2e` | api e2e (실제 DB·Redis 필요, `pnpm db:up`) |
+| `pnpm lint` | ESLint (TS, Next, React Hooks, jsx-a11y, Storybook) |
+| `pnpm test:storybook` | 모든 스토리를 Chromium에서 실행 (play 상호작용, a11y) |
+| `pnpm build:check` | 별도 폴더(`dist-check`, `.next-check`)로 빌드 — dev 서버 실행 중에도 안전 |
+| `pnpm precommit` | 커밋 전 전체 검사 (typecheck · lint · test · test:storybook · build:check, 병렬) |
 | `pnpm storybook` | web 컴포넌트 Storybook (http://localhost:6006) |
 | `pnpm build-storybook` | Storybook 정적 빌드 |
 | `pnpm db:up` / `pnpm db:down` | 로컬 DB·Redis 켜기/끄기 |
@@ -82,7 +87,8 @@ http://localhost:3000 에서 API·DB·Redis 상태 카드가 10초마다 갱신�
 | --- | --- |
 | `/feature` | 계획 → contracts → api·web 병렬 → 검증 → 테스트 보강 → 리뷰 4종 병렬 → 수정 → 커밋 추천 (단계마다 제안 후 수락받고 실행) |
 | `/plan-steps` | 목표를 커밋 크기 단계로 나누고 의존·병렬 그룹·완료 조건 정리 |
-| `/verify` | typecheck·test 병렬 실행, dev 중이면 build 생략 |
+| `/verify` | 작업 중 빠른 검증 (typecheck·test) |
+| `/precommit` | 커밋 전 전체 검사 + 결과 표와 커밋 가능 판정 |
 | `/split-commit` | 변경 사항을 관심사별로 묶어 커밋 메시지·명령을 **추천** (직접 커밋하지 않음) |
 | `/pr-draft` | 작업 브랜치의 PR 초안을 `.pr-drafts/<branch>.md`로 작성 (PR은 직접 올림) |
 | `write-tests`, `write-stories` | 테스트·스토리 작성 기준 |

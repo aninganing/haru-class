@@ -18,7 +18,7 @@ git status --short                  # 커밋 안 된 변경이 있으면 초안 
 
 - base 결정: `feat/` `fix/` `chore/` `docs/` → `develop`, `hotfix/` → `main`, 현재 브랜치가 `develop`이면 릴리스 PR(`develop` → `main`).
 - 브랜치가 `main`/`develop`인데 릴리스가 아니면, 작업 브랜치를 만드는 명령을 먼저 추천하고 멈춘다.
-- 이 대화에서 이미 나온 정보를 우선 쓴다: 계획(plan-steps), `/verify` 결과, 리뷰어 보고, 남은 이슈. 없으면 diff와 커밋에서 정리하고, 검증은 지금 `/verify`를 돌려 결과를 넣는다.
+- 이 대화에서 이미 나온 정보를 우선 쓴다: 계획(plan-steps), `/precommit` 결과, 리뷰어 보고, 남은 이슈. 없으면 diff와 커밋에서 정리하고, 검증은 지금 `/precommit`을 돌려 결과를 넣는다.
 
 ## 2. 제목
 
@@ -49,9 +49,8 @@ git status --short                  # 커밋 안 된 변경이 있으면 초안 
 <!-- 화면 변경이 있으면 첨부. Storybook: <title>/<story> -->
 
 ## 검증
-- [x] `pnpm turbo run typecheck test` — N개 통과
+- [x] `pnpm precommit` — typecheck · lint · test(N) · test:storybook(N) · build:check
 - [x] `pnpm test:e2e` — N개 통과
-- [x] `pnpm build-storybook`
 - [ ] 수동 확인: (사용자가 직접 확인할 시나리오)
 
 ## 리뷰 결과
