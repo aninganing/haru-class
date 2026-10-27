@@ -1,0 +1,41 @@
+/* 색·간격·글꼴은 디자인 시스템 토큰(CSS 변수)만 쓴다. 토큰이 확정되면 자동으로 반영된다. */
+body {
+  margin: 0;
+  background: var(--color-bg-default);
+  color: var(--color-text-default);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-200);
+  line-height: var(--line-height-normal);
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.logo {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: var(--font-size-400);
+  font-weight: var(--font-weight-bold);
+  color: inherit;
+  text-decoration: none;
+}
+
+/* DS Switch는 부모 폭을 채우므로 내용 폭만큼만 차지하는 영역에 둔다. */
+.header-actions {
+  margin-left: auto;
+}
+
+.main {
+  padding: var(--space-8) 0;
+}

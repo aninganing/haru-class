@@ -1,0 +1,14 @@
+{
+  "extends": "@haru/typescript-config/base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "outDir": "dist",
+    "rootDir": "src",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "declaration": false,
+    "noUncheckedIndexedAccess": false
+  },
+  "include": ["src"]
+}

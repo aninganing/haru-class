@@ -1,0 +1,25 @@
+{
+  "name": "haru-class",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@11.20.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @haru/api prisma:migrate",
+    "test:e2e": "turbo run test:e2e",
+    "storybook": "turbo run storybook --filter=@haru/web",
+    "build-storybook": "turbo run build-storybook --filter=@haru/web"
+  },
+  "devDependencies": {
+    "turbo": "^2.11.10",
+    "typescript": "^5.9.3"
+  }
+}
