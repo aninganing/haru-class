@@ -50,6 +50,15 @@ pnpm test:e2e
 
 꺼져 있으면 건너뛰고 "e2e 생략 (pnpm db:up 후 재실행 가능)"으로 보고한다.
 
+dev 서버(:3000, :4000)가 떠 있으면 **라우트 스모크 검사**를 실행한다:
+
+```bash
+pnpm smoke     # scripts/smoke-routes.mjs — 주요 라우트의 HTTP 상태 (/, ?category=, 상세, 404, /api/*)
+```
+
+- 서버 컴포넌트 런타임 오류(클라이언트 모듈의 함수를 서버에서 호출 등)는 단위 테스트·Storybook·build:check가 잡지 못한다. 이 검사가 그 공백을 메운다.
+- exit 2(서버 없음)는 "스모크 생략"으로 보고한다. 새 라우트를 만들면 스크립트의 `checks`에 추가를 제안한다.
+
 ## 4. 결과 정리
 
 출력이 길면 `| sed 's/\x1b\[[0-9;]*m//g' | grep -E "Tests |Test Files|error|✖|Tasks|Failed"`로 요약하고, 실패한 작업만 전체 출력을 본다.
@@ -65,6 +74,7 @@ pnpm test:e2e
 | test:storybook | - | - | ✅ 6 |
 | build:check | ✅ | ✅ | ✅ |
 | e2e | - | ✅ 1 / ⏭ 생략 | - |
+| smoke | - | - | ✅ 12 / ⏭ 생략 |
 
 ### 실패
 - `apps/web/src/x.tsx:12` jsx-a11y/click-events-have-key-events — 원인 한 줄

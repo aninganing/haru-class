@@ -2,6 +2,17 @@ packages:
   - apps/*
   - packages/*
 
+# 같은 버전 패키지를 peer 조합과 상관없이 한 벌로 설치한다 (vitest 등이 여러 벌로 갈라져 타입이 어긋나는 문제 방지)
+dedupePeers: true
+
+# 우리 팀 내부 패키지(디자인 시스템)는 릴리스 직후에도 바로 받는다
+minimumReleaseAgeExclude:
+  - '@aninganing/*'
+
+# jsdom 30은 Node 22.22 이상이 필요해 지금 Node(22.14)에서 실행되지 않는다. 어디서도 30이 깔리지 않게 고정한다.
+overrides:
+  jsdom: ^29.1.1
+
 # 설치 시 빌드 스크립트 실행을 허용할 패키지
 allowBuilds:
   '@prisma/engines': true

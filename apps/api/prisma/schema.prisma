@@ -8,4 +8,97 @@ datasource db {
   provider = "postgresql"
 }
 
-// 도메인 모델(User, Class, ClassSession, Booking, Payment)은 다음 단계에서 추가한다.
+// Booking, Payment는 다음 단계에서 추가한다.
+// 시간은 모두 timestamptz(UTC). 커서 비교가 JS Date(ms)와 정확히 맞도록 정밀도를 3으로 고정한다.
+
+/// SOLD_OUT은 저장하지 않고 capacity - reserved로 계산한다.
+enum SessionStatus {
+  OPEN
+  CLOSED
+
+  @@map("session_status")
+}
+
+enum ClassCategory {
+  CRAFT
+  COOKING
+  DRAWING
+  FLOWER
+  SCENT
+
+  @@map("class_category")
+}
+
+enum ClassDifficulty {
+  INTRO
+  BEGINNER
+  INTERMEDIATE
+
+  @@map("class_difficulty")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  /// 호스트라면 공방 이름
+  name      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  classes   Class[]
+
+  @@map("users")
+}
+
+/// CHECK 제약(마이그레이션 SQL): cardinality(images) <= 6, jsonb_typeof(curriculum) = 'array', price >= 0, duration_minutes > 0
+model Class {
+  id              String          @id @default(cuid())
+  hostId          String          @map("host_id")
+  host            User            @relation(fields: [hostId], references: [id], onDelete: Restrict)
+  title           String
+  summary         String
+  description     String
+  category        ClassCategory
+  difficulty      ClassDifficulty
+  tags            String[]        @default([])
+  /// 동네 이름 (예: 성수동)
+  neighborhood    String
+  /// 전체 주소
+  location        String
+  /// 찾아오는 길 한 줄
+  locationNote    String          @map("location_note")
+  /// 원 단위, 1인 기준
+  price           Int
+  durationMinutes Int             @map("duration_minutes")
+  /// 순서 유지. [0]이 대표 이미지(thumbnailUrl)
+  images          String[]        @default([])
+  learnings       String[]        @default([])
+  /// [{ offsetMinutes, title }] — 읽을 때 contracts 스키마로 검증한다
+  curriculum      Json            @default("[]")
+  inclusions      String
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  sessions        ClassSession[]
+
+  @@index([createdAt(sort: Desc), id(sort: Desc)])
+  @@index([category, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([hostId])
+  @@map("classes")
+}
+
+/// CHECK 제약(마이그레이션 SQL): capacity > 0, reserved >= 0, reserved <= capacity, ends_at > starts_at
+model ClassSession {
+  id        String        @id @default(cuid())
+  classId   String        @map("class_id")
+  class     Class         @relation(fields: [classId], references: [id], onDelete: Cascade)
+  startsAt  DateTime      @map("starts_at") @db.Timestamptz(3)
+  endsAt    DateTime      @map("ends_at") @db.Timestamptz(3)
+  capacity  Int
+  reserved  Int           @default(0)
+  status    SessionStatus @default(OPEN)
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([classId, startsAt])
+  @@index([status, startsAt])
+  @@map("class_sessions")
+}

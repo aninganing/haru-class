@@ -10,6 +10,7 @@
     "test": "vitest run",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
+    "db:seed": "prisma db seed",
     "test:watch": "vitest",
     "test:e2e": "vitest run -c vitest.e2e.config.mts",
     "generate": "prisma generate",

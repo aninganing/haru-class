@@ -15,6 +15,20 @@ description: haru-class의 테스트 작성 가이드. 계층별로 무엇을 �
 | React 컴포넌트 | Vitest + Testing Library + jsdom | `apps/web/src/**/*.test.tsx` | 렌더링 상태, 사용자 상호작용, 호출한 API, 키보드, axe |
 | 화면 상태 시각 확인 | Storybook | `*.stories.tsx` | `write-stories` 스킬 참고 |
 
+## 훅 테스트와 컴포넌트 테스트의 역할 (web)
+
+로직은 `hooks/`·`utils/`에, UI는 `components/`에 둔다(`web-feature` 스킬). 테스트도 같은 경계로 나눈다.
+
+| 무엇을 | 어디서 | 도구 |
+| --- | --- | --- |
+| 상태 전이·분기·에러·재시도·경계값·타이머·브라우저 API 대체 동작 | **훅 테스트** `hooks/useXxx.test.ts(x)` | `renderHook`, 필요하면 `QueryClientProvider` wrapper, `vi.useFakeTimers` |
+| 순수 계산 | **utils 테스트** `utils/xxx.test.ts` | 일반 단위 테스트 |
+| 상태별 렌더링, 이름·역할·`aria-*`, 키보드 조작, axe, 훅과의 연결(대표 흐름 1개) | **컴포넌트 테스트** `components/**/Xxx.test.tsx` | Testing Library |
+
+- 같은 분기를 훅 테스트와 컴포넌트 테스트에서 두 번 검증하지 않는다. 컴포넌트 테스트에서 로직 분기를 발견하면 훅 테스트로 옮긴다.
+- 옮길 때는 옮기기 전 단언 목록과 옮긴 뒤 위치를 대조해 커버리지가 줄지 않게 한다.
+- 컴포넌트 테스트에서 훅을 mock하지 않는다(연결 확인이 목적). 대신 fetch·브라우저 API를 mock한다.
+
 ## 좋은 테스트의 기준
 
 - 이름은 **동작을 문장으로**: `'정원이 가득 차면 409와 안내 문구'`. 구현 이름(`'calls updateMany'`)으로 짓지 않는다.

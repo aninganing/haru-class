@@ -4,7 +4,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { type Env, validateEnv } from './config/env';
+import { ClockModule } from './common/clock.module';
+import { ClassesModule } from './modules/classes/classes.module';
 import { HealthController } from './modules/health/health.controller';
+import { SessionsModule } from './modules/sessions/sessions.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 
@@ -26,8 +29,11 @@ import { RedisModule } from './redis/redis.module';
         };
       },
     }),
+    ClockModule,
     PrismaModule,
     RedisModule,
+    ClassesModule,
+    SessionsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_PIPE, useClass: ZodValidationPipe }],

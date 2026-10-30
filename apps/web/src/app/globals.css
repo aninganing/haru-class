@@ -1,41 +1,148 @@
-/* 색·간격·글꼴은 디자인 시스템 토큰(CSS 변수)만 쓴다. 토큰이 확정되면 자동으로 반영된다. */
-body {
-  margin: 0;
-  background: var(--color-bg-default);
-  color: var(--color-text-default);
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-200);
-  line-height: var(--line-height-normal);
+@import 'tailwindcss';
+
+/*
+ * Tailwind 테마를 디자인 시스템 토큰(CSS 변수)에 연결한다.
+ * - Tailwind 기본 팔레트·글자 크기 등은 지우고(initial) DS 토큰에 연결한 이름만 남긴다 → 토큰 밖의 값은 클래스로 쓸 수 없다.
+ * - inline: 유틸리티가 DS 변수를 직접 참조하므로 다크 테마([data-theme=dark])가 바뀌면 그대로 따라간다.
+ * - 색 키는 DS 변수와 이름이 겹치지 않게 짓는다 (겹치면 theme 레이어에 자기 참조 변수가 생긴다).
+ * - radius·shadow·font-weight는 rounded-md 같은 표준 클래스 이름을 위해 DS와 같은 이름을 쓴다. 이때 Tailwind가
+ *   theme 레이어에 `--radius-md: var(--radius-md)`를 만들지만, DS style.css가 레이어 밖이라 DS 값이 이긴다.
+ *   DS가 토큰을 @layer 안으로 옮기면 이 키들을 다른 이름으로 바꿔야 한다.
+ * - DS 컴포넌트 CSS는 레이어 밖이라 Tailwind preflight(base 레이어)보다 우선한다.
+ */
+@theme inline {
+  --color-*: initial;
+  /* 글자 */
+  --color-fg: var(--color-text-default);
+  --color-fg-subtle: var(--color-text-subtle);
+  --color-fg-accent: var(--color-text-accent);
+  --color-fg-danger: var(--color-text-danger);
+  --color-fg-inverse: var(--color-text-inverse);
+  /* brand-subtle 면 위의 보조 글자 (DS 0.5 / tokens 0.4) */
+  --color-fg-on-brand-subtle: var(--color-text-on-accent-subtle);
+  /* 반전 면(surface-inverse) 위의 강조 글자 */
+  --color-fg-accent-on-inverse: var(--color-text-accent-on-inverse);
+  /* 면 */
+  --color-surface: var(--color-bg-default);
+  --color-surface-subtle: var(--color-bg-subtle);
+  --color-surface-muted: var(--color-bg-muted);
+  --color-surface-inverse: var(--color-bg-inverse);
+  /* 선 */
+  --color-line: var(--color-border-default);
+  --color-line-control: var(--color-border-control);
+  --color-focus: var(--color-border-focus);
+  /* 강조 (DS의 --color-accent-*와 이름이 겹치지 않게 brand로 부른다) */
+  --color-brand: var(--color-accent-default);
+  --color-brand-hover: var(--color-accent-hover);
+  --color-brand-subtle: var(--color-accent-subtle);
+  --color-danger: var(--color-danger-default);
+  --color-success: var(--color-success-default);
+
+  /* 간격: DS space-1(4px) 배수. p-3 = space-3 */
+  --spacing: var(--space-1);
+
+  --font-*: initial;
+  --font-sans: var(--font-family-sans);
+  --font-mono: var(--font-family-mono);
+
+  --text-*: initial;
+  --text-50: var(--font-size-50);
+  --text-100: var(--font-size-100);
+  --text-200: var(--font-size-200);
+  --text-300: var(--font-size-300);
+  --text-400: var(--font-size-400);
+  --text-500: var(--font-size-500);
+  --text-600: var(--font-size-600);
+
+  --font-weight-*: initial;
+  --font-weight-regular: var(--font-weight-regular);
+  --font-weight-medium: var(--font-weight-medium);
+  --font-weight-semibold: var(--font-weight-semibold);
+  --font-weight-bold: var(--font-weight-bold);
+
+  --leading-*: initial;
+  --leading-tight: var(--line-height-tight);
+  --leading-normal: var(--line-height-normal);
+  --leading-relaxed: var(--line-height-relaxed);
+
+  --radius-*: initial;
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
+
+  --shadow-*: initial;
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+
+  /* 레이아웃 브레이크포인트 (모바일 시안 / 헤더 내비 / 상세 2단) */
+  --breakpoint-*: initial;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --container-content: 72rem;
 }
 
-.container {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 0 var(--space-4);
+@layer base {
+  body {
+    background: var(--color-bg-default);
+    color: var(--color-text-default);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-200);
+    line-height: var(--line-height-normal);
+  }
+
+  /* preflight가 링크 색을 inherit로 바꾼다. 본문 링크는 토큰 강조색 + 밑줄로 구분한다 (방문 여부와 무관하게 같은 색). */
+  a:not([class]) {
+    color: var(--color-text-accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-4) 0;
-  border-bottom: 1px solid var(--color-border-default);
+/*
+ * 모바일 하단 탭(높이 h-18 = space-1 × 18)과 아이폰 홈 인디케이터(safe-area) 처리.
+ * env()는 테마 값으로 표현할 수 없어 이름 있는 유틸리티로 둔다 (클래스에 임의값을 쓰지 않기 위해).
+ */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-.logo {
-  flex-shrink: 0;
-  white-space: nowrap;
-  font-size: var(--font-size-400);
-  font-weight: var(--font-weight-bold);
-  color: inherit;
-  text-decoration: none;
+/* 하단 탭에 Tab 포커스가 가리지 않게 (WCAG 2.4.11). 탭바 높이 + safe-area */
+@utility scroll-pb-tabbar {
+  scroll-padding-bottom: calc(--spacing(18) + env(safe-area-inset-bottom, 0px));
 }
 
-/* DS Switch는 부모 폭을 채우므로 내용 폭만큼만 차지하는 영역에 둔다. */
-.header-actions {
-  margin-left: auto;
+/* 하단 탭이 있는 페이지의 본문 아래 여백: 탭바 높이 + space-8 + safe-area */
+@utility pb-tabbar {
+  padding-bottom: calc(--spacing(26) + env(safe-area-inset-bottom, 0px));
 }
 
-.main {
-  padding: var(--space-8) 0;
+/* 가로 스크롤 줄(카테고리 칩, 마감 임박)의 스크롤바 숨김. 스크롤 자체는 그대로 된다. */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ---------- 클래스 상세 ---------- */
+
+/* PC(lg) 2단: 왼쪽 콘텐츠 / 오른쪽 예약 카드 22rem */
+@utility grid-cols-detail {
+  grid-template-columns: minmax(0, 1fr) --spacing(88);
+}
+
+/* 모바일·태블릿 하단 고정 CTA 바(약 6rem) + safe-area만큼 본문 아래를 비운다 */
+@utility pb-cta-bar {
+  padding-bottom: calc(--spacing(24) + env(safe-area-inset-bottom, 0px));
+}
+
+/* CTA 바 안쪽 아래 여백: space-5 + safe-area */
+@utility pb-safe-5 {
+  padding-bottom: calc(--spacing(5) + env(safe-area-inset-bottom, 0px));
+}
+
+/* CTA 바에 Tab 포커스가 가리지 않게 (WCAG 2.4.11) */
+@utility scroll-pb-cta-bar {
+  scroll-padding-bottom: calc(--spacing(24) + env(safe-area-inset-bottom, 0px));
 }
