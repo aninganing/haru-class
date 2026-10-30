@@ -1,7 +1,7 @@
 import type { Health } from '@haru/contracts';
 import { queryOptions } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import { keys } from './keys';
+import { keys } from '@/lib/query/keys';
 
 export const healthQuery = () =>
   queryOptions({

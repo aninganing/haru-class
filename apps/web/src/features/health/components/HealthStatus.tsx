@@ -2,7 +2,7 @@
 
 import { Badge, Card } from '@aninganing/react';
 import { useQuery } from '@tanstack/react-query';
-import { healthQuery } from '@/lib/query/health';
+import { healthQuery } from '@/features/health/api/queries';
 
 const tone = (state: 'up' | 'down') => (state === 'up' ? 'success' : 'danger');
 

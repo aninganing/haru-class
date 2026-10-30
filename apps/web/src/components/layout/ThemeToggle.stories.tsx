@@ -17,6 +17,13 @@ export const Light: Story = {};
 
 export const Dark: Story = {
   args: { initialTheme: 'dark' },
+  // 스위치는 <html data-theme>을 읽으므로 실제 페이지처럼 html도 dark여야 한다.
+  // 직접 바꾸면 테마 애드온이 렌더 뒤에 기본값으로 되돌리므로, 이 스토리만 애드온으로 dark를 지정한다.
+  parameters: { themes: { disable: false } },
+  globals: { theme: 'dark' },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('switch', { name: '다크 모드' })).toBeChecked();
+  },
 };
 
 export const Toggle: Story = {
