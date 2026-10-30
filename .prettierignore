@@ -1,0 +1,13 @@
+node_modules
+dist
+dist-check
+.next
+.next-check
+.turbo
+storybook-static
+coverage
+pnpm-lock.yaml
+apps/api/src/generated
+apps/api/prisma/migrations
+apps/web/next-env.d.ts
+.pr-drafts

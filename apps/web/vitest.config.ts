@@ -33,7 +33,9 @@ export default defineConfig({
           browser: {
             enabled: true,
             headless: true,
-            provider: playwright({}),
+            // pnpm이 vitest@5.0.5를 peer 조합별로 여러 벌 설치해서 @vitest/browser가 다른 벌의 타입을 참조한다.
+            // 버전이 같아 실행에는 문제가 없고 타입만 어긋난다 (dedupePeers·jsdom override로도 남음). 의존성 정리 후 제거.
+            provider: playwright({}) as never,
             instances: [{ browser: 'chromium' }],
           },
         },
