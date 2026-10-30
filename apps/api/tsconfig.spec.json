@@ -7,6 +7,7 @@
   "include": [
     "src",
     "test",
+    "prisma/seed.ts",
     "vitest.config.mts",
     "vitest.e2e.config.mts"
   ]
