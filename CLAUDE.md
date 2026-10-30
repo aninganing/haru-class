@@ -17,6 +17,8 @@
 - **제안 → 사용자 수락 → 실행.** 메인 세션과 모든 에이전트는 작업 방향(목표, 접근, 바꿀 파일, 확인할 것)을 먼저 제안하고, 사용자가 수락한 뒤에만 파일을 바꾸거나 상태를 바꾸는 명령을 실행한다. 수락은 그 단계에만 적용된다.
 - 에이전트는 `[승인]` 없이 띄우면 제안만 돌려준다. 수락 후 SendMessage로 **같은 에이전트**에 `[승인] <수정 사항>`을 보내 실행시킨다.
 - 읽기·검증(파일 읽기, typecheck, test)은 수락 없이 해도 된다.
+- **반복 한도**: 수정 → 재검증 루프는 최대 2회, 같은 검증 명령 재실행은 최대 2번. 넘으면 멈추고 보고한다. 안정성 확인용 반복 실행은 하지 않는다.
+- **작업량 한도**: 에이전트 한 번의 실행은 도구 호출 약 40회·파일 15개 안. 큰 일은 제안 단계에서 나눠서 여러 번에 걸쳐 실행한다. 메인 세션도 에이전트에게 이 한도를 넘는 범위를 한 번에 맡기지 않는다.
 - **커밋은 하지 않는다.** `git add`/`git commit` 등 이력·인덱스를 바꾸는 명령을 실행하지 않고, `split-commit` 스킬로 커밋 묶음·메시지·명령을 추천만 한다.
 - 커밋 메시지 형식: 첫 줄 `type: 요약`(scope 없음), 빈 줄, 본문은 짧은 불릿 2~4개.
 
@@ -66,15 +68,20 @@ hotfix/... : main에서 분기 → main으로 PR → develop에도 반영
 - Node는 22.14(현재 로컬). 엔진 요구가 더 높은 패키지(jsdom 30 등)는 쓰지 않는다.
 - TypeScript는 5.9 (Nest 데코레이터 메타데이터). `baseUrl` 같은 TS 6+ deprecated 옵션을 쓰지 않는다.
 - 시간은 DB에 `timestamptz`(UTC)로 저장하고 화면에서 Asia/Seoul로 표시한다.
+- 에이전트를 포함해 git 인덱스·이력·브랜치를 바꾸는 명령(`git add`, `git mv`, `git rm` 등)을 실행하지 않는다. 파일 이동은 일반 `mv`.
 - 비밀값(토큰, .env 내용)을 코드·커밋·출력에 넣지 않는다. DS 패키지 토큰은 `~/.npmrc`에만 있다.
 
 ## 웹 규칙 요약 (자세한 건 `.claude/skills/web-feature`, `a11y-check`)
 
 - Next 16은 학습 데이터와 API가 다를 수 있다. 새 API를 쓰기 전 `apps/web/node_modules/next/dist/docs/`의 해당 문서를 확인한다.
 - 브라우저는 Nest를 직접 부르지 않는다. `@/lib/api/client`의 `api`만 쓴다 (서버: Nest 직접, 브라우저: `/api` 프록시).
-- 쿼리 키는 `src/lib/query/keys.ts`에서만 만든다. 쿼리는 `queryOptions`로 `src/features/<domain>/queries.ts`에 둔다.
-- 색·간격·글꼴은 DS 토큰 CSS 변수(`--color-*`, `--space-*`, `--font-size-*`, `--radius-*`)만 쓴다. DS에 없는 컴포넌트(Calendar, Dialog, Select, Toast 등)는 `src/components/ui`에 만든다.
+- 디렉터리: `features/<domain>/{components,hooks,api,utils,constants,styles,fixtures}`, 범용 훅은 `src/hooks/`, 앱 공용은 `components/{layout,ui}`. UI(컴포넌트)와 로직(훅·utils)을 나누고, barrel(`index.ts`)은 만들지 않는다. 자세한 건 `web-feature` 스킬.
+- 쿼리 키는 `src/lib/query/keys.ts`에서만 만든다. 쿼리는 `queryOptions`로 `src/features/<domain>/api/queries.ts`에 둔다.
+- 스타일은 **Tailwind v4 클래스**로 쓴다 (CSS 모듈 금지). 테마는 `src/app/globals.css`의 `@theme inline`이 DS 토큰에 연결한 이름만 있다: 색 `fg`·`fg-subtle`·`fg-accent`·`surface`·`surface-subtle`·`line`·`focus`·`brand`·`danger`…, 글자 `text-50~600`, `font-regular~bold`, `leading-tight|normal|relaxed`, `rounded-sm~full`, `shadow-sm|md`, 간격은 DS space-1 배수(`p-3` = space-3), 브레이크포인트 `md`(48rem)·`lg`(64rem). 임의값(`p-[13px]`, `text-[#fff]`)은 쓰지 않는다.
+- 클래스 합치기는 `@/lib/cn`의 `cn()`(clsx + tailwind-merge), 변형이 있는 컴포넌트는 `cva`. 클래스 순서는 Prettier(`prettier-plugin-tailwindcss`)가 정렬한다 — 바꾼 파일은 `pnpm exec prettier --write <파일>`.
+- DS에 없는 컴포넌트(Calendar, Dialog, Select, Toast 등)는 `src/components/ui`에 만든다.
 - DS 컴포넌트에 함수 props를 넘기는 코드는 `'use client'` 컴포넌트 안에 둔다.
+- `'use client'` 파일에서 export한 일반 함수·상수는 서버 컴포넌트에서 호출할 수 없다 (런타임 500). 서버·클라이언트 공용 로직은 `'use client'`가 없는 모듈에 둔다.
 - 상호작용 컴포넌트는 테스트(키보드 + `expectNoA11yViolations`)와 상태별 스토리를 함께 만든다.
 
 ## API 규칙 요약 (자세한 건 `.claude/skills/nest-module`)
@@ -95,6 +102,7 @@ pnpm lint               # ESLint (루트 eslint.config.mjs)
 pnpm test:storybook     # 스토리를 Chromium에서 실행 (play·a11y)
 pnpm build:check        # dist-check/·.next-check/로 빌드 (dev 중에도 안전)
 pnpm precommit          # typecheck·lint·test·test:storybook·build:check 병렬 (커밋 전)
+pnpm smoke              # dev 서버의 주요 라우트 HTTP 상태 (서버 컴포넌트 런타임 오류 확인)
 pnpm storybook          # web Storybook :6006
 pnpm build-storybook    # Storybook 정적 빌드 (dev 중에도 안전)
 pnpm --filter @haru/api prisma:migrate   # 마이그레이션

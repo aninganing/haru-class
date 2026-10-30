@@ -9,16 +9,24 @@ description: haru-class apps/web(Next.js 16 + TanStack Query + @aninganing/react
 
 ```
 apps/web/src/
-├─ app/<route>/page.tsx          # 서버 컴포넌트: prefetch + HydrationBoundary
+├─ app/<route>/page.tsx            # 서버 컴포넌트: prefetch + HydrationBoundary
 ├─ features/<domain>/
-│  ├─ queries.ts                 # queryOptions, useMutation 훅
-│  ├─ <Thing>.tsx                # 'use client' 컴포넌트
-│  ├─ <Thing>.test.tsx
-│  └─ <Thing>.stories.tsx
-├─ components/ui/                # DS에 없는 범용 컴포넌트 (Dialog, Calendar, Toast...)
-├─ lib/api/client.ts             # api.get/post/patch/delete (수정 거의 없음)
-└─ lib/query/keys.ts             # 쿼리 키 팩토리 (여기서만 키 생성)
+│  ├─ components/[<area>/]         # UI만: props를 받아 그리고 훅을 호출한다 (+ 옆에 .test.tsx, .stories.tsx)
+│  ├─ hooks/                       # 이 기능의 상태·부수효과 로직 (useXxx) + 옆에 .test.ts(x)
+│  ├─ api/                         # queryOptions·useMutation (queries.ts), 서버 로더
+│  ├─ utils/                       # 순수 함수 (포맷, 계산, href 만들기) + .test.ts
+│  ├─ constants/                   # 문구·숫자 상수
+│  ├─ styles/                      # 공용 Tailwind 클래스 (cn·cva로 감싼다)
+│  └─ fixtures/                    # 테스트·스토리용 데이터
+├─ hooks/                          # 기능과 무관한 범용 훅 (useAutoLoad, useHorizontalScroller …)
+├─ components/layout/ · ui/        # 앱 공용 레이아웃 / DS에 없는 범용 UI
+├─ lib/                            # api client, query client·keys, cn, theme
+└─ test/                           # 테스트 헬퍼
 ```
+
+- **UI와 로직을 나눈다**: 상태(`useState`)·부수효과(`useEffect`)·쿼리·브라우저 API 호출이 컴포넌트에 몇 줄 이상 생기면 `hooks/`의 `useXxx`로 옮기고, 컴포넌트는 훅이 돌려준 값으로 그리기만 한다. 계산은 `utils/`의 순수 함수로.
+- **barrel(`index.ts`) 금지**: 서버 파일이 barrel을 거쳐 `'use client'` 모듈의 함수를 불러오면 런타임 500이 난다. 파일을 직접 import한다.
+- 테스트·스토리는 대상 파일 옆에 둔다.
 
 ## Next 16
 
@@ -67,7 +75,7 @@ export default async function Page({ params }: PageProps<'/classes/[classId]'>) 
 
 - 사용 가능: `Badge`(tone: neutral/accent/success/danger), `Button`(variant: primary/secondary/danger, size, isLoading), `Card`(+ `.Media` `.Body` `.Title`), `Checkbox`, `CheckboxGroup`, `Chip`, `Input`, `Radio`, `RadioGroup`, `Skeleton`, `Switch`(label 필수, onCheckedChange), `Tabs`, `Textarea`, `Tooltip`.
 - props가 헷갈리면 `node_modules/@aninganing/react/dist/index.d.ts`를 확인한다. Storybook: https://aning-design-system.vercel.app/
-- 스타일은 DS 토큰만: `var(--color-bg-default|subtle|muted)`, `--color-text-default|subtle|accent|danger`, `--color-border-default`, `--space-1..16`, `--font-size-50..600`, `--font-weight-*`, `--radius-sm|md|lg|full`. 하드코딩한 색·px 금지.
+- 스타일은 Tailwind 클래스로 쓰고(CLAUDE.md 웹 규칙의 테마 이름만), 아래 DS 토큰은 `@theme`를 거쳐 클래스가 된다. 원본 토큰: `var(--color-bg-default|subtle|muted)`, `--color-text-default|subtle|accent|danger`, `--color-border-default`, `--space-1..16`, `--font-size-50..600`, `--font-weight-*`, `--radius-sm|md|lg|full`. 하드코딩한 색·px 금지.
 - 레이아웃에 주의: `Switch`처럼 부모 폭을 채우는 컴포넌트, flex column 안에서 늘어나는 `Badge`는 래퍼로 감싼다.
 - 로딩 상태는 `Skeleton`, 비어 있음/에러는 문구 + `Badge tone="danger"`.
 

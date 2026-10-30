@@ -66,6 +66,8 @@ http://localhost:3000 에서 API·DB·Redis 상태 카드가 10초마다 갱신�
 | `pnpm lint` | ESLint (TS, Next, React Hooks, jsx-a11y, Storybook) |
 | `pnpm test:storybook` | 모든 스토리를 Chromium에서 실행 (play 상호작용, a11y) |
 | `pnpm build:check` | 별도 폴더(`dist-check`, `.next-check`)로 빌드 — dev 서버 실행 중에도 안전 |
+| `pnpm smoke` | 실행 중인 dev 서버의 주요 라우트 HTTP 상태 확인 |
+| `pnpm format` / `pnpm format:check` | Prettier (+ Tailwind 클래스 정렬) |
 | `pnpm precommit` | 커밋 전 전체 검사 (typecheck · lint · test · test:storybook · build:check, 병렬) |
 | `pnpm storybook` | web 컴포넌트 Storybook (http://localhost:6006) |
 | `pnpm build-storybook` | Storybook 정적 빌드 |

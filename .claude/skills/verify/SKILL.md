@@ -31,7 +31,7 @@ pnpm turbo run typecheck test --continue
 | DB·Redis가 running | `pnpm test:e2e` |
 | `apps/web`의 컴포넌트/스토리를 바꿈 | `pnpm build-storybook` (dev 중에도 안전) |
 | 개발 서버가 **꺼져 있음** | `pnpm build` |
-| 개발 서버가 **켜져 있음** | `build`는 실행하지 않는다 (`nest build`가 dist를 지워 api가 죽는다). 대신 `curl -s localhost:4000/health`와 `curl -s localhost:3000/api/health`로 살아 있는지 확인 |
+| 개발 서버가 **켜져 있음** | `build`는 실행하지 않는다 (`nest build`가 dist를 지워 api가 죽는다). 대신 `pnpm smoke`로 주요 라우트의 HTTP 상태를 확인한다 (서버 컴포넌트 런타임 오류는 테스트·빌드가 못 잡는다) |
 | Prisma 스키마를 바꿈 | `pnpm turbo run generate` 후 위 검증 (typecheck·test는 generate에 의존하므로 turbo로 돌리면 자동) |
 
 ## 4. 보고

@@ -28,6 +28,13 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 - 승인된 범위만 실행한다. 승인 메시지에 수정 사항이 있으면 반영한다.
 - 진행 중에 제안과 크게 달라져야 하면(바꿀 파일 영역, 데이터 변경, 새 의존성) 멈추고 다시 제안한다.
 
+## 작업 한도 (넘으면 멈추고 보고)
+
+- **수정 → 재검증 루프는 최대 2회.** 2회째에도 실패하면 더 고치지 말고 실패 출력과 원인 추정을 보고한다.
+- **같은 검증 명령은 최대 2번까지 실행한다.** 안정성을 보려고 같은 테스트를 여러 번 반복 실행하지 않는다 (필요하면 제안만).
+- **한 번의 실행 단계는 도구 호출 약 40회, 바꾸는 파일 15개 안에서 끝낸다.** 넘을 것 같으면 1단계(제안)에서 범위를 나눠 제안하고, 실행 중에 넘게 되면 그 지점에서 멈추고 남은 일을 보고한다.
+- 예상 밖 상황(대화형 프롬프트, 권한 거부, 사용량 한도)에서는 우회하지 말고 바로 보고한다.
+
 ## 시작 전에
 
 1. 루트 `CLAUDE.md`를 읽는다.
@@ -37,7 +44,7 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 
 ## 수정해도 되는 파일
 
-- `**/*.spec.ts`, `**/*.test.tsx`, `apps/api/test/**`, `**/*.stories.tsx`
+- `**/*.spec.ts`, `**/*.test.ts`, `**/*.test.tsx`, `apps/api/test/**`, `**/*.stories.tsx`
 - 테스트 헬퍼: `apps/web/src/test/**`
 
 제품 코드(`src/**`의 나머지), 설정 파일, contracts는 수정하지 않는다.
@@ -45,6 +52,7 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 
 ## 규칙
 
+- **git 명령으로 인덱스·이력·브랜치를 바꾸지 않는다** (`git add`, `git mv`, `git rm`, `git restore --staged`, `git commit`, `git switch` 등). 파일 이동·삭제는 일반 `mv`·`rm`으로 한다. git은 `status`·`diff`·`log` 같은 읽기만 쓴다.
 - `pnpm add` 금지 (필요한 도구는 보고에 적는다). dev 서버·`build` 실행 금지.
 - e2e는 DB·Redis가 떠 있을 때만 실행한다 (`docker compose ps`). 데이터는 테스트 안에서 만들고 지운다.
 - 상호작용 컴포넌트마다 키보드 테스트와 `expectNoA11yViolations`를 넣는다.
