@@ -1,0 +1,124 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+# 같은 브랜치(PR)에서 새로 push하면 이전 실행은 취소한다
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  # @aninganing/* 디자인 시스템 패키지(GitHub Packages)를 설치한다.
+  # 각 패키지 설정의 "Manage Actions access"에 이 저장소가 Read로 추가돼 있어야 한다.
+  packages: read
+
+env:
+  # prisma.config.ts가 DATABASE_URL을 반드시 요구한다 (generate에도 필요). verify에서는 형식만 맞으면 된다.
+  DATABASE_URL: postgresql://haru:haru@localhost:5432/haru_class
+  REDIS_URL: redis://localhost:6379
+  API_URL: http://localhost:4000
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  # main으로는 develop(릴리스)과 hotfix/*(긴급 수정)만 병합한다. ruleset은 출발 브랜치를 제한하지 못해서 여기서 막는다.
+  # develop 대상 PR과 push에서는 건너뛴다 (건너뛴 작업은 필수 검사 통과로 취급된다).
+  branch-policy:
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: main에 병합할 수 있는 브랜치인지 확인
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [[ "$HEAD_REF" == "develop" || "$HEAD_REF" == hotfix/* ]]; then
+            echo "허용: $HEAD_REF → main"
+          else
+            echo "::error::main에는 develop 또는 hotfix/* 브랜치만 병합할 수 있어요 (현재: $HEAD_REF)"
+            exit 1
+          fi
+
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Playwright 브라우저 캐시
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Chromium 설치 (Storybook 테스트용)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter @haru/web exec playwright install --with-deps chromium
+
+      - name: Chromium 시스템 의존성 (캐시 적중 시)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm --filter @haru/web exec playwright install-deps chromium
+
+      # typecheck · lint · test · test:storybook · build:check (turbo 병렬)
+      - run: pnpm precommit
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: haru
+          POSTGRES_PASSWORD: haru
+          POSTGRES_DB: haru_class
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U haru -d haru_class"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: 마이그레이션 적용
+        run: pnpm --filter @haru/api exec prisma migrate deploy
+
+      - run: pnpm test:e2e
+
+      # 서버 컴포넌트 런타임 오류는 테스트·빌드가 못 잡는다 → 실제로 띄워 주요 라우트 상태를 본다 (scripts/smoke-routes.mjs)
+      - name: 시드
+        run: pnpm db:seed
+
+      - name: 빌드
+        run: pnpm build
+
+      - name: api·web 실행
+        run: |
+          (cd apps/api && PORT=4000 node dist/main > ../../api.log 2>&1 &)
+          (pnpm --filter @haru/web start > web.log 2>&1 &)
+          for i in $(seq 1 60); do
+            curl -sf localhost:4000/health > /dev/null && curl -sf -o /dev/null localhost:3000/api/health && exit 0
+            sleep 2
+          done
+          echo "::error::서버가 2분 안에 뜨지 않았어요"
+          tail -50 api.log web.log
+          exit 1
+
+      - run: pnpm smoke
+
+      - name: 실패 시 서버 로그
+        if: failure()
+        run: tail -100 api.log web.log || true

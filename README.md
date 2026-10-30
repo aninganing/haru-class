@@ -106,6 +106,12 @@ http://localhost:3000 에서 API·DB·Redis 상태 카드가 10초마다 갱신�
 - 병합은 merge commit. 브랜치 생성·커밋·push·PR은 사람이 직접 한다 (Claude는 명령과 PR 초안만 제안)
 - 커밋 메시지: `type: 요약` + 빈 줄 + 짧은 불릿
 
+## CI와 브랜치 보호
+
+- GitHub Actions `ci`: `verify`(typecheck·lint·test·Storybook 테스트·build:check), `e2e`(DB·Redis 위에서 e2e + 빌드 후 스모크), `branch-policy`(main으로는 develop·hotfix/*만).
+- main·develop은 ruleset으로 보호한다: PR 필수, 필수 검사 통과, merge commit만, force push·삭제 금지.
+- 디자인 시스템 패키지(`@aninganing/*`) 각각의 **Manage Actions access**에 이 저장소를 Read로 추가해야 CI가 설치할 수 있다.
+
 ## 배포 메모
 
 - **web (Vercel)**: Root Directory는 `apps/web`. 환경변수 `API_URL`과,
