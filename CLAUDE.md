@@ -96,6 +96,7 @@ hotfix/... : main에서 분기 → main으로 PR → develop에도 반영
 - ruleset 필수 검사: develop = `verify`, `e2e` / main = `verify`, `e2e`, `branch-policy`. 병합은 merge commit만.
 - 공통 준비는 `.github/actions/setup` (Node는 `.nvmrc` 22.14.0, pnpm은 packageManager, DS 패키지는 `GITHUB_TOKEN` + 각 패키지 "Manage Actions access"에 이 저장소 Read).
 - CI 작업 이름을 바꾸면 ruleset의 필수 검사 이름도 같이 바꿔야 한다 (안 바꾸면 PR이 영원히 대기).
+- Turborepo 2는 strict env 모드라 `turbo.json`에 없는 환경변수는 작업에 전달되지 않는다. 로컬은 `.env`로 채워져 통과해도 CI에서 실패한다. turbo 작업에 새 환경변수가 필요하면 `globalPassThroughEnv`(또는 작업별 `passThroughEnv`)에 추가한다.
 
 ## 명령어
 

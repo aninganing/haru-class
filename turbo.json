@@ -1,97 +1,52 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [
-    "NODE_ENV"
-  ],
-  "globalDependencies": [
-    "eslint.config.mjs"
-  ],
+  "globalEnv": ["NODE_ENV"],
+  "globalPassThroughEnv": ["DATABASE_URL", "REDIS_URL", "API_URL", "PORT"],
+  "globalDependencies": ["eslint.config.mjs"],
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build",
-        "generate"
-      ],
-      "outputs": [
-        "dist/**",
-        ".next/**",
-        "!.next/cache/**"
-      ]
+      "dependsOn": ["^build", "generate"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "dev": {
-      "dependsOn": [
-        "^build",
-        "generate"
-      ],
+      "dependsOn": ["^build", "generate"],
       "cache": false,
       "persistent": true
     },
     "lint": {
-      "dependsOn": [
-        "^build",
-        "generate"
-      ],
+      "dependsOn": ["^build", "generate"],
       "outputs": []
     },
     "typecheck": {
-      "dependsOn": [
-        "^build",
-        "generate"
-      ]
+      "dependsOn": ["^build", "generate"]
     },
     "test": {
-      "dependsOn": [
-        "^build",
-        "generate"
-      ],
+      "dependsOn": ["^build", "generate"],
       "outputs": []
     },
     "test:e2e": {
-      "dependsOn": [
-        "^build",
-        "generate"
-      ],
+      "dependsOn": ["^build", "generate"],
       "cache": false
     },
     "storybook": {
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     },
     "build-storybook": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "storybook-static/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": ["storybook-static/**"]
     },
     "generate": {
-      "inputs": [
-        "prisma/schema.prisma",
-        "prisma.config.ts"
-      ],
-      "outputs": [
-        "src/generated/**"
-      ]
+      "inputs": ["prisma/schema.prisma", "prisma.config.ts"],
+      "outputs": ["src/generated/**"]
     },
     "build:check": {
-      "dependsOn": [
-        "^build",
-        "generate"
-      ],
-      "outputs": [
-        "dist-check/**",
-        ".next-check/**",
-        "!.next-check/cache/**"
-      ]
+      "dependsOn": ["^build", "generate"],
+      "outputs": ["dist-check/**", ".next-check/**", "!.next-check/cache/**"]
     },
     "test:storybook": {
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "outputs": []
     }
   }
