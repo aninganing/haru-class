@@ -90,6 +90,13 @@ hotfix/... : main에서 분기 → main으로 PR → develop에도 반영
 - 동시성이 걸린 쓰기(좌석 등)는 조건부 UPDATE나 트랜잭션으로 원자적으로 처리한다.
 - 비동기 작업은 BullMQ 큐. jobId로 멱등성을 보장한다 (`:` 문자는 쓰지 않는다).
 
+## CI (GitHub Actions, `.github/workflows/ci.yml`)
+
+- 작업: `verify`(= `pnpm precommit`), `e2e`(Postgres·Redis 서비스 → migrate deploy → test:e2e → seed → build → 서버 실행 → `pnpm smoke`), `branch-policy`(main 대상 PR은 develop·hotfix/*만).
+- ruleset 필수 검사: develop = `verify`, `e2e` / main = `verify`, `e2e`, `branch-policy`. 병합은 merge commit만.
+- 공통 준비는 `.github/actions/setup` (Node는 `.nvmrc` 22.14.0, pnpm은 packageManager, DS 패키지는 `GITHUB_TOKEN` + 각 패키지 "Manage Actions access"에 이 저장소 Read).
+- CI 작업 이름을 바꾸면 ruleset의 필수 검사 이름도 같이 바꿔야 한다 (안 바꾸면 PR이 영원히 대기).
+
 ## 명령어
 
 ```bash

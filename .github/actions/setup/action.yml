@@ -1,0 +1,29 @@
+name: setup
+description: Node(.nvmrc) + pnpm(packageManager) + 디자인 시스템 레지스트리 인증 + 의존성 설치 + turbo 캐시
+
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+        # 사용자 수준 npmrc에 @aninganing 레지스트리와 인증 줄을 쓴다.
+        # pnpm 11은 프로젝트 .npmrc의 토큰 환경변수는 펼치지 않지만 사용자 수준 설정은 펼친다.
+        registry-url: https://npm.pkg.github.com
+        scope: '@aninganing'
+
+    - name: 의존성 설치
+      shell: bash
+      run: pnpm install --frozen-lockfile
+      env:
+        NODE_AUTH_TOKEN: ${{ github.token }}
+
+    - name: turbo 캐시
+      uses: actions/cache@v4
+      with:
+        path: .turbo
+        key: turbo-${{ runner.os }}-${{ github.sha }}
+        restore-keys: turbo-${{ runner.os }}-
